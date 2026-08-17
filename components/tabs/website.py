@@ -35,52 +35,78 @@ def add_website_from_input():
     st.session_state["website_input_error"] = None
 
 
+def clear_websites():
+    st.session_state["websites"] = []
+
+
 def website():
     if not ingestion_is_configured():
-        st.text_input(
-            "Enter a Website",
-            label_visibility="visible",
-            disabled=True,
-            key="new_website_disabled",
-        )
-        st.button("➕", disabled=True)
+        with st.container(border=True):
+            st.caption(
+                "Configure a chat model and an embedding model in Settings to "
+                "enable website ingestion."
+            )
+            st.text_input(
+                "Website URL",
+                placeholder="https://docs.python.org/3/",
+                disabled=True,
+                key="new_website_disabled",
+            )
+            st.button(
+                "Add URL",
+                icon=":material/add_link:",
+                disabled=True,
+                use_container_width=True,
+            )
         return
 
-    st.write("Enter a Website")
-    col1, col2 = st.columns([1, 0.2])
-    with col1:
+    with st.container(border=True):
+        st.caption(
+            "Add up to 5 public HTTPS URLs. A hostname without a scheme gets "
+            "`https://` added automatically."
+        )
+
         st.text_input(
-            "Enter a Website",
+            "Website URL",
             placeholder="https://docs.python.org/3/",
-            label_visibility="collapsed",
             key="new_website",
             on_change=add_website_from_input,
         )
-    with col2:
-        add_button = st.button("➕", help="Add URL to list")
+        add_button = st.button(
+            "Add URL",
+            icon=":material/add_link:",
+            use_container_width=True,
+        )
 
-    if add_button:
-        add_website_from_input()
+        if add_button:
+            add_website_from_input()
 
-    if st.session_state.get("website_input_error"):
-        st.error(st.session_state["website_input_error"])
+        if st.session_state.get("website_input_error"):
+            st.error(st.session_state["website_input_error"])
 
-    if len(st.session_state.get("websites", [])) > 0:
-        st.markdown(f"<p>Website(s)</p>", unsafe_allow_html=True)
-        for site in st.session_state["websites"]:
-            st.caption(f"- {site}")
-        st.write("")
-
-    col_proc, col_clr = st.columns([1, 1])
-    with col_proc:
-        process_button = st.button("Process", key="process_website")
-    with col_clr:
         if len(st.session_state.get("websites", [])) > 0:
-            if st.button("Clear List", key="clear_websites"):
-                st.session_state["websites"] = []
-                st.session_state["new_website"] = ""
-                st.session_state["website_input_error"] = None
-                st.rerun()
+            st.write("")
+            st.markdown("**Website(s)**")
+            for site in st.session_state["websites"]:
+                st.caption(f"- {site}")
+            st.write("")
+
+        col_proc, col_clr = st.columns([1, 1])
+        with col_proc:
+            process_button = st.button(
+                "Process",
+                icon=":material/task_alt:",
+                key="process_website",
+                use_container_width=True,
+            )
+        with col_clr:
+            st.button(
+                "Clear List",
+                icon=":material/delete_sweep:",
+                key="clear_websites_button",
+                on_click=clear_websites,
+                use_container_width=True,
+            )
 
     if process_button:
         if st.session_state.get("new_website", "").strip():

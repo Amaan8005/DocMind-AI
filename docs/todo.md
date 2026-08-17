@@ -7,11 +7,11 @@ Although not final, items are generally sorted from highest to lowest priority.
 ### Core
 
 - [x] Migrate Chat Stream to Llama-Index
-- [x] Implement Llama-Index Chat Engine with Memory
-- [x] Swap Chatbox UI to Llama-Index Chat Engine
+- [x] Conversational memory for direct chat (trimmed to a token budget)
+- [x] Swap Chatbox UI to Llama-Index LLM streaming
 - [x] Function to Handle File Embeddings
 - [x] Allow Switching of Embedding Model & Settings
-- [x] Delete Files after Index Created/Failed
+- [x] Delete Files after Index Created
 - [x] Support Additional Import Options
     - [x] GitHub Repos
     - [x] Websites
@@ -21,7 +21,7 @@ Although not final, items are generally sorted from highest to lowest priority.
 - [x] Extract Metadata and Load into Index
 - [x] Faster Document Embeddings (Cuda, Batch Size, ...)
 - [ ] Swap to OpenAI compatible endpoints
-- [ ] Allow Usage of Ollama hosted embeddings
+- [x] Allow Usage of Ollama hosted embeddings
 - [ ] Enable support for additional LLM backends
     - [ ] Local AI
     - [ ] TabbyAPI
@@ -30,20 +30,19 @@ Although not final, items are generally sorted from highest to lowest priority.
 ### User Experience
 
 - [x] Show Loaders in UI (File Uploads, Conversions, ...)
-- [x] View and Manage Imported Files
-- [x] About Tab in Sidebar w/ Resources
+- [ ] View and Manage Imported Files
 - [x] Enable Caching
 - [ ] Allow Users to Set LLM Settings
-    - [x] System Prompt
+    - [x] Answer-style presets (system prompt presets)
     - [x] Chat Mode
     - [ ] Temperature
     - [x] top_k
     - [x] chunk_size
-    - [ ] chunk_overlap (needs to be proportional to chunk_size?)
+    - [x] chunk_overlap (note: should stay proportional to chunk_size?)
 - [ ] Additional Error Handling
     - [x] Starting a chat without an Ollama model set
     - [x] Non-existent GitHub repos
-    - [ ] Non-existent Embedding models
+    - [x] Non-existent Embedding models
     - [x] Non-existent Websites
     - [ ] System Level Errors (CUDA OOM, Hugging Face downtime, ...)
 
@@ -67,5 +66,5 @@ Although not final, items are generally sorted from highest to lowest priority.
 ### Other
 
 - [ ] Investigate [R2R](https://github.com/SciPhi-AI/R2R) backend support/migration
-- [ ] ROCm Support -- Wanted: AMD Testers! 🔍🔴
-- [ ] Improved Windows / Windows + Docker Support
+- [x] ROCm Docker Compose support (untested — AMD testers wanted)
+- [x] Windows support (`run.ps1` launcher, stale-checkout handling)

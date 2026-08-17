@@ -1,36 +1,55 @@
 # DocMind AI
 
-
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/8588/badge)](https://www.bestpractices.dev/projects/8588)
 ![GitHub Commit Activity](https://img.shields.io/github/commit-activity/t/Ashita-no-Kaushar/DocMind-AI)
 ![GitHub Last Commit](https://img.shields.io/github/last-commit/Ashita-no-Kaushar/DocMind-AI)
 ![GitHub License](https://img.shields.io/github/license/Ashita-no-Kaushar/DocMind-AI)
 
-Offline, open-source retrieval augmented generation (RAG).
+**Offline, open-source retrieval augmented generation (RAG).**
 
 DocMind AI is a local-first RAG application. It ingests local files, GitHub repositories, and websites, then answers questions about them with local Ollama models. Chat, embeddings, and indexed source content stay entirely on your machine or network.
+
+---
+
+## Contents
+
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [System Architecture](#system-architecture)
+- [How It Works](#how-it-works)
+- [Getting Started](#getting-started)
+- [Project Information](#project-information)
+- [License](#license)
+
+---
 
 ## Features
 
 ### Ingestion Sources
 
-- **Local files** — upload `csv`, `docx`, `epub`, `ipynb`, `json`, `md`, `pdf`, `ppt`, `pptx`, and `txt` files. Up to 10 files, 25 MB each, 100 MB total per upload. Re-uploading the same files reuses the existing index; changed files are reprocessed.
-- **GitHub repositories** — clone any public repo from `owner/repo` or a full `https://github.com/owner/repo` URL with a shallow `--depth 1` clone. Only `github.com` repository-root URLs are accepted.
-- **Websites** — fetch up to 5 public HTTPS URLs per ingestion and convert them to grounded chat content.
+| Source | Details |
+| --- | --- |
+| **Local files** | Upload `csv`, `docx`, `epub`, `ipynb`, `json`, `md`, `pdf`, `ppt`, `pptx`, and `txt` files — up to 10 files, 25 MB each, 100 MB total per upload. Re-uploading the same files reuses the existing index; changed files are reprocessed. |
+| **GitHub repositories** | Clone any public repo from `owner/repo` or a full `https://github.com/owner/repo` URL with a shallow `--depth 1` clone. Only `github.com` repository-root URLs are accepted. |
+| **Websites** | Fetch up to 5 public HTTPS URLs per ingestion and convert them to grounded chat content. |
 
 ### RAG Pipeline
 
-- Document loading, configurable chunking (chunk size and overlap), and Ollama embeddings with exact progress display.
+- Document loading with configurable chunking (chunk size and overlap) and Ollama embeddings with exact progress display.
+- Hybrid retrieval that fuses vector similarity with BM25 keyword scores, applies a similarity threshold, filters near-duplicates, and packs results into a compact context budget.
 - In-memory LlamaIndex vector store and a streaming query engine.
+- Indexes are cached on disk (`.index_cache`), so re-ingesting the same documents skips re-embedding entirely.
 - Automatic cleanup of transient ingestion files after indexing.
 
 ### Chat
 
-- Streaming, grounded RAG responses through LlamaIndex with conversational memory.
+- **Dual mode** — grounded RAG answers when documents are indexed; direct LLM conversation otherwise.
+- Streaming, grounded RAG responses through LlamaIndex.
 - 6 answer-style presets.
 - **Live retrieval controls** — Top K and similarity-threshold sliders that apply to the next query immediately.
 - Document-introduction retrieval for summary / "about this document" questions.
 - Responses built from a compact context budget for speed and lower resource use.
+- Direct chat keeps conversational memory (trimmed to a token budget); RAG mode answers each question from the retrieved context.
 
 ### Settings & Data
 
@@ -52,6 +71,8 @@ DocMind AI is a local-first RAG application. It ingests local files, GitHub repo
 - Tested on Windows and Linux.
 - Fully offline once models are installed.
 
+---
+
 ## Tech Stack
 
 | Layer | Technology |
@@ -66,47 +87,69 @@ DocMind AI is a local-first RAG application. It ingests local files, GitHub repo
 | Chat export | python-docx |
 | State | Streamlit session state + browser `localStorage` |
 | Packaging | Pipenv (`Pipfile`) + `requirements.txt` |
-| Deployment | Docker (NVIDIA / ROCm), `run.ps1` / shell launcher |
+| Deployment | Docker (NVIDIA / ROCm), `run.ps1` (Windows) |
 | Dev tools | black, ruff, pytest / unittest |
+
+---
 
 ## System Architecture
 
 ```
-+------------------------ Browser / Streamlit UI ------------------------+
-|  main.py                                                               |
-|   ├─ page_config.py      page setup, menu links, branding             |
-|   ├─ page_state.py       initial session state                        |
-|   ├─ header.py · sidebar.py · chatbox.py                              |
-|   └─ components/tabs/    files · github_repo · website · settings · about |
-+-----------------------------------+------------------------------------+
-                                    |
-                                    v
-+----------------------------- utils ------------------------------------+
-|  helpers.py            guardrails, uploads, GitHub clone, website fetch |
-|  rag_pipeline.py       ingestion pipeline (load → chunk → embed → index)|
-|  llama_index.py        SimpleDirectoryReader, embeddings, index, engine |
-|  ollama.py             chat + embedding model discovery                |
-|  browser_settings.py   browser localStorage persistence               |
-|  logs.py               docmind.log                                    |
-+-----------------------------------+------------------------------------+
-                                    |
-                                    v
-                     +---------------------------------+
-                     |          Ollama (11434)         |
-                     |   chat models · embeddings      |
-                     +---------------------------------+
++---------------------------- Browser / Streamlit UI ----------------------------+
+|  main.py                                                                       |
+|   ├─ page_config.py            page setup, menu links, branding                |
+|   ├─ page_state.py             initial session state                           |
+|   ├─ header.py · sidebar.py · chatbox.py                                       |
+|   ├─ ingestion_prerequisites.py  ingestion model-config checks                 |
+|   └─ components/tabs/           sources · files · github_repo · website ·      |
+|                                 settings                                       |
++----------------------------------------+---------------------------------------+
+                                         |
+                                         v
++---------------------------------- utils ---------------------------------------+
+|  helpers.py            guardrails, uploads, GitHub clone, website fetch         |
+|  rag_pipeline.py       ingestion pipeline (load → chunk → embed → index)        |
+|  llama_index.py        readers, embeddings, hybrid retriever, index, engine     |
+|  ollama.py             chat + embedding model discovery and chat streams        |
+|  browser_settings.py   browser localStorage persistence                         |
+|  logs.py               docmind.log                                              |
++----------------------------------------+---------------------------------------+
+                                         |
+                                         v
+                              +------------------------------+
+                              |         Ollama (11434)        |
+                              |   chat models · embeddings    |
+                              +------------------------------+
 ```
+
+---
 
 ## How It Works
 
 1. **Setup** — Install Ollama and pull at least one chat model and one embedding model (e.g. `qwen2.5:0.5b` and `nomic-embed-text:latest`).
 2. **Configure** — In Settings, set the Ollama endpoint and select the chat and embedding models. These choices are saved in the browser and restored on your next visit.
 3. **Ingest** — Choose a source: upload local files, point at a GitHub repo, or enter website URLs. Every input is checked against security guardrails before processing.
-4. **Index** — Documents are loaded, split into chunks using the configured chunk size/overlap, embedded with Ollama, and stored in an in-memory LlamaIndex vector store.
+4. **Index** — Documents are loaded, split into chunks using the configured chunk size/overlap, embedded with Ollama, and stored in an in-memory LlamaIndex vector store (cached to disk for instant re-ingestion).
 5. **Chat** — Each question retrieves the Top K most relevant chunks (above the similarity threshold), packs them into a compact context, and streams a grounded answer from the local model. Adjust Top K / similarity live and re-ask without re-indexing.
 6. **Export** — Download the conversation as a Word document from Settings.
 
 Transient ingestion files are deleted automatically once indexing completes.
+
+---
+
+## Getting Started
+
+See [Setup & Deploy the App](docs/setup.md) for full instructions. The short version:
+
+```bash
+pip install pipenv
+pipenv install
+pipenv run streamlit run main.py
+```
+
+The app expects Python 3.12–3.13, a running Ollama instance (default endpoint `http://localhost:11434`), and at least one chat-capable and one embedding-capable model.
+
+---
 
 ## Project Information
 
@@ -117,12 +160,10 @@ Transient ingestion files are deleted automatically once indexing completes.
 - [Contributing](docs/contributing.md)
 - [Security Policy](SECURITY.md)
 - [Changelog](CHANGELOG.md)
-
-## Getting Started
-
-- [Setup & Deploy the App](docs/setup.md)
 - [Using DocMind](docs/usage.md)
 - [RAG Pipeline](docs/pipeline.md)
+
+---
 
 ## License
 

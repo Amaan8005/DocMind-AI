@@ -1,0 +1,31 @@
+DocMind AI - Local RAG Assistant
+
+DocMind AI is an offline retrieval augmented generation (RAG) assistant. It runs
+entirely on your machine: no cloud service, no data leaves your computer. All
+text embedding and chat generation are handled locally by the Ollama runtime
+using models such as llama3, qwen2.5, and nomic-embed-text.
+
+Key features:
+- Ingest local files, GitHub repositories, and websites.
+- Supported file types include TXT, CSV, DOCX, PPTX, PDF, Markdown, and more.
+- Chat in two modes: a direct chat with conversational memory, and a grounded
+  RAG mode that answers only from your ingested documents.
+- A hybrid retrieval approach combines vector similarity (embeddings) with
+  BM25 keyword search for better answers.
+- The index cache is stored on disk, so once documents are processed they do
+  not need to be re-embedded on the next run.
+
+How ingestion works:
+1. Sources are fetched or uploaded (files, repositories, URLs).
+2. Documents are chunked and embedded with the configured embedding model.
+3. A vector index plus a BM25 index are created and cached on disk.
+4. When you ask a question, the most relevant chunks are retrieved and passed
+   to the chat model as context.
+
+Limits: up to 300 documents and 4 MB of text per ingestion run. Ollama models
+are pulled locally, so an internet connection is only needed the first time a
+model is downloaded.
+
+DocMind AI is developed and maintained on GitHub under the MIT license. This
+sample text file exists so you can test uploading and querying a plain text
+document.

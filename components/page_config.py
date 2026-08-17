@@ -23,6 +23,20 @@ def set_page_config():
     .stDeployButton {
             visibility: hidden;
         }
+    /* Give the sidebar more width so Data Sources rows never feel cramped */
+    section[data-testid="stSidebar"] {
+        min-width: 320px;
+    }
+    /* Breathing room between sidebar expanders */
+    section[data-testid="stSidebar"] div[data-testid="stExpander"] {
+        margin-bottom: 0.75rem;
+        border-radius: 8px;
+    }
+    /* Hide the in-box "Press Enter to apply" overlay; the app shows this
+       instruction below the input instead */
+    [data-testid="InputInstructions"] {
+        display: none;
+    }
     </style>
     """,
         unsafe_allow_html=True,

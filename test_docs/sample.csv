@@ -1,0 +1,13 @@
+quarter,product,category,units_sold,revenue_usd,region
+Q1,Alphabot 3000,Robotics,1200,240000,North America
+Q1,Alphabot 3000,Robotics,850,170000,Europe
+Q2,Alphabot 3000,Robotics,1350,270000,North America
+Q2,Alphabot 3000,Robotics,900,180000,Asia Pacific
+Q3,DocMind Pro,Software,2100,315000,North America
+Q3,DocMind Pro,Software,1650,247500,Europe
+Q4,DocMind Pro,Software,2600,390000,North America
+Q4,DocMind Pro,Software,1800,270000,Asia Pacific
+Q1,SmartChip X9,Hardware,3000,450000,Asia Pacific
+Q2,SmartChip X9,Hardware,3400,510000,North America
+Q3,SmartChip X9,Hardware,3100,465000,Europe
+Q4,SmartChip X9,Hardware,3700,555000,Asia Pacific

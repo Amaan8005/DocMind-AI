@@ -18,16 +18,16 @@ def sources():
         render_ingestion_settings_warning()
         st.write("")
 
-    with st.expander("💻 &nbsp; **Local Files**", expanded=False):
+    with st.expander("**Local Files**", expanded=False, icon=":material/folder_open:"):
         local_files()
 
-    with st.expander("🗂️ &nbsp;**GitHub Repo**", expanded=False):
+    with st.expander("**GitHub Repo**", expanded=False, icon=":material/account_tree:"):
         github_repo()
 
-    with st.expander("🌐 &nbsp; **Website**", expanded=False):
+    with st.expander("**Website**", expanded=False, icon=":material/language:"):
         website()
 
-    with st.expander("💡 &nbsp; **Cooling & Speed Tips**", expanded=False):
+    with st.expander("**Cooling & Speed Tips**", expanded=False, icon=":material/lightbulb:"):
         st.markdown(
             "- **Prefer short documents:** 10-20 page PDFs (or `.txt`/`.md`) embed in seconds. "
             "A 300-page book takes minutes and heats the laptop.\n"

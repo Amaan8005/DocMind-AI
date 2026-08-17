@@ -25,17 +25,43 @@ def should_show_github_ingestion_status(
     )
 
 
+def _apply_example_repo():
+    selected = st.session_state.get("github_repo_examples")
+    if selected:
+        st.session_state["github_repo"] = selected
+        st.session_state["github_repo_examples"] = None
+
+
 def github_repo():
     # st.header("Import files from a GitHub repo")
     # st.caption("Convert a GitHub repo to embeddings for utilization during chat")
     if ingestion_is_configured():
-        with st.form("github_repo_form"):
-            st.text_input(
-                "Select a GitHub.com repo",
-                placeholder="Ashita-no-Kaushar/DocMind-AI",
-                key="github_repo",
+        with st.container(border=True):
+            st.caption(
+                "Clone a public repository and index its files for grounded "
+                "chat. Accepted formats: `owner/repo` or "
+                "`https://github.com/owner/repo`."
             )
-            repo_processed = st.form_submit_button("Process")
+
+            example_repo = st.pills(
+                "Or pick an example",
+                ["Ashita-no-Kaushar/DocMind-AI", "streamlit/streamlit"],
+                selection_mode="single",
+                key="github_repo_examples",
+                on_change=_apply_example_repo,
+            )
+
+            with st.form("github_repo_form"):
+                st.text_input(
+                    "Repository",
+                    placeholder="Ashita-no-Kaushar/DocMind-AI",
+                    key="github_repo",
+                )
+                repo_processed = st.form_submit_button(
+                    "Process Repository",
+                    icon=":material/cloud_download:",
+                    use_container_width=True,
+                )
 
         if repo_processed:
             input_repo = (st.session_state.get("github_repo") or "").strip()
@@ -100,13 +126,20 @@ def github_repo():
             st.write("Your files are ready. Let's chat! 😎") # TODO: This should be a button.
 
     else:
-        st.text_input(
-            "Select a GitHub.com repo",
-            placeholder="Ashita-no-Kaushar/DocMind-AI",
-            key="github_repo_disabled",
-            disabled=True,
-        )
-        st.button(
-            "Process Repo",
-            disabled=True,
-        )
+        with st.container(border=True):
+            st.caption(
+                "Configure a chat model and an embedding model in Settings to "
+                "enable GitHub ingestion."
+            )
+            st.text_input(
+                "Repository",
+                placeholder="Ashita-no-Kaushar/DocMind-AI",
+                key="github_repo_disabled",
+                disabled=True,
+            )
+            st.button(
+                "Process Repository",
+                icon=":material/cloud_download:",
+                disabled=True,
+                use_container_width=True,
+            )
